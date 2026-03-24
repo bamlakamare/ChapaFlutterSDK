@@ -887,8 +887,7 @@ class PaymentMethodsCustomBuilderView extends StatefulWidget {
       _PaymentMethodsCustomBuilderViewState();
 }
 
-class _PaymentMethodsCustomBuilderViewState
-    extends State<PaymentMethodsCustomBuilderView> {
+class _PaymentMethodsCustomBuilderViewState extends State<PaymentMethodsCustomBuilderView> {
   @override
   Widget build(BuildContext context) {
     Size deviceSize = MediaQuery.of(context).size;

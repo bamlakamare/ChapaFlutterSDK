@@ -10,13 +10,13 @@ import 'package:chapasdk/data/services/payment_service.dart';
 import 'package:meta/meta.dart';
 
 part 'chapa_native_checkout_event.dart';
+
 part 'chapa_native_checkout_state.dart';
 
 /// The ChapaNativeCheckoutBloc handles the logic for processing payments
 /// through the Chapa SDK. It listens for events like payment initiation and
 /// validation, and updates the state of the payment process accordingly.
-class ChapaNativeCheckoutBloc
-    extends Bloc<ChapaNativeCheckoutEvent, ChapaNativeCheckoutState> {
+class ChapaNativeCheckoutBloc extends Bloc<ChapaNativeCheckoutEvent, ChapaNativeCheckoutState> {
   /// The payment service used to interact with the Chapa API for payment
   /// initialization and verification.
   PaymentService paymentService;
@@ -25,25 +25,22 @@ class ChapaNativeCheckoutBloc
   ///
   /// [paymentService]: A required instance of [PaymentService] to handle
   /// payment-related operations like initiating and verifying payments.
-  ChapaNativeCheckoutBloc({required this.paymentService})
-      : super(ChapaNativeCheckoutInitial()) {
+  ChapaNativeCheckoutBloc({required this.paymentService}) : super(ChapaNativeCheckoutInitial()) {
     on<ChapaNativeCheckoutEvent>((event, emit) {
       emit(ChapaNativeCheckoutInitial());
     });
+
     on<InitiatePayment>((event, emit) async {
       emit(ChapaNativeCheckoutLoadingState());
       try {
-        NetworkResponse networkResponse =
-            await paymentService.initializeDirectPayment(
+        NetworkResponse networkResponse = await paymentService.initializeDirectPayment(
           request: event.directChargeRequest,
           publicKey: event.publicKey,
         );
 
         if (networkResponse is Success) {
-          DirectChargeSuccessResponse directChargeSuccessResponse =
-              networkResponse.body;
-          String reference =
-              directChargeSuccessResponse.data!.meta!.refId ?? "";
+          DirectChargeSuccessResponse directChargeSuccessResponse = networkResponse.body;
+          String reference = directChargeSuccessResponse.data!.meta!.refId ?? "";
 
           if (reference.isNotEmpty) {
             add(ValidatePayment(
@@ -83,6 +80,7 @@ class ChapaNativeCheckoutBloc
         emit(ChapaNativeCheckoutUnknownError());
       }
     });
+
     on<ValidatePayment>((event, emit) async {
       emit(ChapaNativeCheckoutValidationOngoingState());
       try {
@@ -104,12 +102,10 @@ class ChapaNativeCheckoutBloc
             ));
           } else {
             emit(ChapaNativeCheckoutPaymentValidateSuccessState(
-                directChargeValidateResponse: networkResponse.body,
-                isPaymentFailed: true));
+                directChargeValidateResponse: networkResponse.body, isPaymentFailed: true));
           }
         } else if (networkResponse is ApiError) {
-          emit(ChapaNativeCheckoutPaymentValidateApiError(
-              apiErrorResponse: networkResponse.error));
+          emit(ChapaNativeCheckoutPaymentValidateApiError(apiErrorResponse: networkResponse.error));
         } else if (networkResponse is NetworkError) {
           emit(ChapaNativeCheckoutNetworkError());
         } else {
